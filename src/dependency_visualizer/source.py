@@ -58,7 +58,7 @@ def load_test_graph(path: str) -> dict[str, list[str]]:
                     raise SourceError(f"пакет задан повторно: {package}")
                 graph[package] = dependencies
     except OSError as exc:
-        raise SourceError(f"не удалось прочитать тестовый граф: {exc}") from exc
+        raise SourceError(f"не удалось чекнуть тестовый граф: {exc}") from exc
     for dependencies in list(graph.values()):
         for package in dependencies:
             graph.setdefault(package, [])

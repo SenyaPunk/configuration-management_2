@@ -60,7 +60,7 @@ def _read_values(path: Path) -> dict[str, str]:
         with path.open(newline="", encoding="utf-8-sig") as stream:
             rows = list(csv.reader(stream))
     except OSError as exc:
-        raise ConfigError(f"не удалось прочитать конфигурацию: {exc}") from exc
+        raise ConfigError(f"не удалось чекнуть конфигурацию: {exc}") from exc
     for row_number, row in enumerate(rows, 1):
         if not row or not any(cell.strip() for cell in row):
             continue
