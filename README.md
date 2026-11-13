@@ -7,19 +7,19 @@ CLI-инструмент строит граф зависимостей Python-�
 
 ## Структура
 
-- `src/dependency_visualizer/config.py` — CSV и проверка параметров.
-- `src/dependency_visualizer/source.py` — тестовый граф и PyPI JSON API.
-- `src/dependency_visualizer/graph.py` — итеративный DFS, глубина и циклы.
-- `src/dependency_visualizer/render.py` — Mermaid, SVG и ASCII-дерево.
-- `tests/` — автоматические тесты.
-- `run.bat` — запуск из корня.
+- `src/dependency_visualizer/config.py` - CSV и проверка параметров.
+- `src/dependency_visualizer/source.py` - тестовый граф и PyPI JSON API.
+- `src/dependency_visualizer/graph.py` - итеративный DFS, глубина и циклы.
+- `src/dependency_visualizer/render.py` - Mermaid, SVG и ASCII-дерево.
+- `tests/` - автоматические тесты.
+- `run.bat` - запуск из корня.
 
 ## Параметры CSV
 
 Файл содержит строки `ключ,значение` и может начинаться с `key,value`.
 Обязательные ключи: `package`, `repository`, `test_mode`, `version`,
 `ascii_tree`, `max_depth`. `test_mode` и `ascii_tree` принимают `true`, `false`,
-`1` или `0`. `max_depth` — неотрицательное целое число.
+`1` или `0`. `max_depth` - неотрицательное целое число.
 
 `repository` в тестовом режиме является путем к CSV-графу. Относительный путь
 разрешается относительно файла конфигурации. В обычном режиме это URL PyPI,
@@ -36,11 +36,11 @@ python -m unittest discover -s tests -v
 
 Параметры командной строки:
 
-- `--config PATH` — CSV-конфигурация.
-- `--direct` — вывести прямые зависимости и завершить работу.
-- `--graph` — вывести ребра графа в формате `A->B`.
-- `--reverse PACKAGE` — вывести обратные зависимости пакета.
-- `--output PATH` — путь SVG, по умолчанию `graph.svg`.
+- `--config PATH` - CSV-конфигурация.
+- `--direct` - вывести прямые зависимости и завершить работу.
+- `--graph` - вывести ребра графа в формате `A->B`.
+- `--reverse PACKAGE` - вывести обратные зависимости пакета.
+- `--output PATH` - путь SVG, по умолчанию `graph.svg`.
 
 При построении графа программа печатает Mermaid, сохраняет SVG и, если
 `ascii_tree=true`, печатает ASCII-дерево. Циклическое ребро в дереве помечается
@@ -48,7 +48,7 @@ python -m unittest discover -s tests -v
 
 ## Примеры варианта 13
 
-Тестовый граф находится в `examples/repository.csv`, а конфигурация — в
+Тестовый граф находится в `examples/repository.csv`, а конфигурация - в
 `examples/config-a.csv`, `examples/config-b.csv` и `examples/config-c.csv`. В них показаны три пакета `A`, `B` и `C`, общий
 пакет `D` и цикл `D->A`.
 
