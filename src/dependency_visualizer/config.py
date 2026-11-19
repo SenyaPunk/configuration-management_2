@@ -52,28 +52,39 @@ def _validate_name(value: str) -> str:
     return value
 
 
-def _read_values(path: Path) -> dict[str, str]:
+def _read_rows(path: Path) -> list[list[str]]:
     if not path.is_file():
         raise ConfigError(f"файл конфигурации не найден: {path}")
-    values: dict[str, str] = {}
     try:
         with path.open(newline="", encoding="utf-8-sig") as stream:
-            rows = list(csv.reader(stream))
+            return list(csv.reader(stream))
     except OSError as exc:
         raise ConfigError(f"не удалось чекнуть конфигурацию: {exc}") from exc
-    for row_number, row in enumerate(rows, 1):
+
+
+def _config_entry(row: list[str], row_number: int):
+    if len(row) != 2:
+        raise ConfigError(
+            f"строка {row_number} должна содержать два поля"
+        )
+    key, value = (cell.strip() for cell in row)
+    header = key.lower() == "key" and value.lower() == "value"
+    if row_number == 1 and header:
+        return None
+    if key not in KEYS:
+        raise ConfigError(f"неизвестный параметр: {key}")
+    return key, value
+
+
+def _read_values(path: Path) -> dict[str, str]:
+    values: dict[str, str] = {}
+    for row_number, row in enumerate(_read_rows(path), 1):
         if not row or not any(cell.strip() for cell in row):
             continue
-        if len(row) != 2:
-            raise ConfigError(
-                f"строка {row_number} должна содержать два поля"
-            )
-        key, value = (cell.strip() for cell in row)
-        header = key.lower() == "key" and value.lower() == "value"
-        if row_number == 1 and header:
+        entry = _config_entry(row, row_number)
+        if entry is None:
             continue
-        if key not in KEYS:
-            raise ConfigError(f"неизвестный параметр: {key}")
+        key, value = entry
         if key in values:
             raise ConfigError(f"параметр задан повторно: {key}")
         values[key] = value

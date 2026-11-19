@@ -39,24 +39,32 @@ def _row_dependencies(row: list[str]) -> tuple[str, list[str]]:
     return package, values
 
 
-def load_test_graph(path: str) -> dict[str, list[str]]:
+def _parse_graph_row(row: list[str], line_number: int):
+    try:
+        return _row_dependencies(row)
+    except SourceError as exc:
+        raise SourceError(f"строка {line_number}: {exc}") from exc
+
+
+def _parse_graph_rows(rows) -> dict[str, list[str]]:
     graph: dict[str, list[str]] = {}
+    for line_number, row in enumerate(rows, 1):
+        if not row or not any(cell.strip() for cell in row):
+            continue
+        package, dependencies = _parse_graph_row(row, line_number)
+        if package in graph:
+            raise SourceError(f"пакет задан повторно: {package}")
+        graph[package] = dependencies
+    return graph
+
+
+def load_test_graph(path: str) -> dict[str, list[str]]:
     file_path = Path(path)
     if not file_path.is_file():
         raise SourceError(f"файл тестового графа не найден: {path}")
     try:
         with file_path.open(newline="", encoding="utf-8-sig") as stream:
-            rows = csv.reader(stream)
-            for line_number, row in enumerate(rows, 1):
-                if not row or not any(cell.strip() for cell in row):
-                    continue
-                try:
-                    package, dependencies = _row_dependencies(row)
-                except SourceError as exc:
-                    raise SourceError(f"строка {line_number}: {exc}") from exc
-                if package in graph:
-                    raise SourceError(f"пакет задан повторно: {package}")
-                graph[package] = dependencies
+            graph = _parse_graph_rows(csv.reader(stream))
     except OSError as exc:
         raise SourceError(f"не удалось чекнуть тестовый граф: {exc}") from exc
     for dependencies in list(graph.values()):

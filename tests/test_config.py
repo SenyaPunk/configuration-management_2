@@ -56,6 +56,33 @@ class ConfigTests(unittest.TestCase):
         with self.assertRaises(ConfigError):
             load_config(path)
 
+    def test_rejects_unknown_duplicate_and_malformed_rows(self):
+        cases = (
+            ("unknown,value\n", "неизвестный параметр"),
+            ("package,A\npackage,B\n", "задан повторно"),
+            ("package,A,extra\n", "строка 1"),
+        )
+        for text, message in cases:
+            with self.subTest(text=text):
+                path = self.write_config(text)
+                with self.assertRaisesRegex(ConfigError, message):
+                    load_config(path)
+
+    def test_skips_blank_rows_and_preserves_http_url(self):
+        path = self.write_config(
+            "key,value\n\n , \npackage,requests\n"
+            "repository,https://pypi.org/pypi\ntest_mode,false\n"
+            "version,2.32.3\nascii_tree,false\nmax_depth,2\n"
+        )
+        config = load_config(path)
+        self.assertEqual(config.repository, "https://pypi.org/pypi")
+        self.assertFalse(config.test_mode)
+
+    def test_rejects_missing_file(self):
+        path = Path(self.temporary.name) / "missing.csv"
+        with self.assertRaisesRegex(ConfigError, "не найден"):
+            load_config(path)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -31,6 +31,28 @@ class SourceTests(unittest.TestCase):
         with self.assertRaises(SourceError):
             load_test_graph("missing.csv")
 
+    def test_rejects_empty_duplicate_and_malformed_graphs(self):
+        cases = (
+            ("\n , \n", "граф пуст"),
+            ("A,B\nA,C\n", "задан повторно"),
+            ("A,B\n,B\n", "строка 2"),
+        )
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "graph.csv"
+            for text, message in cases:
+                with self.subTest(text=text):
+                    path.write_text(text, encoding="utf-8")
+                    with self.assertRaisesRegex(SourceError, message):
+                        load_test_graph(path)
+
+    def test_skips_blank_rows_and_preserves_cycles(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "graph.csv"
+            path.write_text("\n , \nA,B\nB,A\n", encoding="utf-8")
+            self.assertEqual(load_test_graph(path), {
+                "A": ["B"], "B": ["A"]
+            })
+
 
 if __name__ == "__main__":
     unittest.main()
